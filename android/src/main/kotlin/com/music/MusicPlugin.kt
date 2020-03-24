@@ -3,10 +3,9 @@ package com.music
 import android.Manifest
 import android.annotation.TargetApi
 import android.app.Activity
-import android.os.Build.VERSION
 import android.os.Build.VERSION_CODES
-import android.util.Log
-import com.music.util.MusicUtils
+import com.lzx.starrysky.StarrySky
+import com.lzx.starrysky.provider.SongInfo
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.embedding.engine.plugins.activity.ActivityAware
 import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
@@ -41,7 +40,6 @@ open class MusicPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
   }
 
   @TargetApi(VERSION_CODES.M) fun requestPermission(): Boolean {
-
     activity ?: return false
     val code =
       activity!!.checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) + activity!!.checkSelfPermission(
@@ -61,10 +59,15 @@ open class MusicPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
   }
 
   override fun onMethodCall(call: MethodCall, result: Result) {
+    StarrySky.init(activity!!.application)
     if (call.method == "getPlatformVersion") {
       if (requestPermission()) {
-        MusicUtils.getIntance().init(activity)
-        result.success("New Android ${MusicUtils.getIntance().songListJson}")
+        val info = SongInfo()
+        info.songId = "111"
+        info.songUrl =
+          "https://webfs.yun.kugou.com/202003241405/b115cd03e8cc3e479f7b5a2158546f1a/G164/M01/1F/09/RIcBAF1FXz6AImQhAC0SISFl4Mw962.mp3"
+        StarrySky.with().playMusicByInfo(info)
+        result.success("New Android 12")
       } else {
         result.success("not Permission")
       }
@@ -82,11 +85,8 @@ open class MusicPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
   override fun onReattachedToActivityForConfigChanges(p0: ActivityPluginBinding) {
   }
 
-
-
   override fun onAttachedToActivity(p0: ActivityPluginBinding) {
     activity = p0.activity
-    Log.d("Plugin","给activity负值${activity?.localClassName}")
   }
 
   override fun onDetachedFromActivityForConfigChanges() {
