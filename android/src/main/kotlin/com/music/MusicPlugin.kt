@@ -66,7 +66,21 @@ open class MusicPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
     val info = SongInfo()
     info.songId = map["songId"] ?: ""
     info.songUrl = map["songUrl"] ?: ""
-    StarrySky.with().playMusicByInfo(info)
+    val sky = StarrySky.with()
+    if (!sky.isCurrMusicIsPlayingMusic(info.songId)){
+      sky.playMusicByInfo(info)
+    } else if (sky.isIdea()){
+      sky.removeSongInfo(info.songId)
+      val originId = info.songId
+      info.songId = info.songId + "copy"
+      sky.playMusicByInfo(info)
+      sky.stopMusic()
+      sky.removeSongInfo(info.songId)
+      info.songId = originId
+      sky.playMusicByInfo(info)
+    }
+    Log.d("playSong","${info.songId} is playing ${sky.isIdea()}")
+
   }
 
   override fun onMethodCall(call: MethodCall, result: Result) {
@@ -81,10 +95,10 @@ open class MusicPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
     result.success("true")
   }
 
-  private fun seekTo(positon: Long) {
+  private fun seekTo(position: Long) {
     val sky = StarrySky.with()
     if (sky.isPlaying()) {
-      sky.seekTo(positon)
+      sky.seekTo(position)
     }
   }
 
