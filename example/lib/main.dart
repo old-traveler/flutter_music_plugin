@@ -25,7 +25,8 @@ class _MyAppState extends State<MyApp> {
     String platformVersion;
     // Platform messages may fail, so we use a try/catch PlatformException.
     try {
-      platformVersion = await Music.platformVersion;
+      platformVersion = await Music.playSong('111',
+          "https://webfs.yun.kugou.com/202003241405/b115cd03e8cc3e479f7b5a2158546f1a/G164/M01/1F/09/RIcBAF1FXz6AImQhAC0SISFl4Mw962.mp3");
     } on PlatformException {
       platformVersion = 'Failed to get platform version.';
     }
@@ -51,7 +52,7 @@ class _MyAppState extends State<MyApp> {
           child: Center(
             child: Text('Running on: $_platformVersion\n'),
           ),
-          onTap: (){
+          onTap: () {
             initPlatformState();
           },
         ),

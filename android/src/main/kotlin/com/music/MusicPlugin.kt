@@ -3,7 +3,9 @@ package com.music
 import android.Manifest
 import android.annotation.TargetApi
 import android.app.Activity
+import android.os.Build.VERSION
 import android.os.Build.VERSION_CODES
+import android.util.Log
 import com.lzx.starrysky.StarrySky
 import com.lzx.starrysky.provider.SongInfo
 import io.flutter.embedding.engine.plugins.FlutterPlugin
@@ -16,21 +18,18 @@ import io.flutter.plugin.common.MethodChannel.Result
 import io.flutter.plugin.common.PluginRegistry.Registrar
 
 /** MusicPlugin */
+@Suppress("UNCHECKED_CAST")
 open class MusicPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
+
+  private lateinit var mChannel: MethodChannel
+
   override fun onAttachedToEngine(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
-    val channel = MethodChannel(flutterPluginBinding.binaryMessenger, "music")
-    channel.setMethodCallHandler(MusicPlugin())
+    mChannel = MethodChannel(flutterPluginBinding.binaryMessenger, "music")
+    mChannel.setMethodCallHandler(MusicPlugin())
+    Log.d("MusicPlugin", "onAttachedToEngine")
   }
 
-  // This static function is optional and equivalent to onAttachedToEngine. It supports the old
-  // pre-Flutter-1.12 Android projects. You are encouraged to continue supporting
-  // plugin registration via this function while apps migrate to use the new Android APIs
-  // post-flutter-1.12 via https://flutter.dev/go/android-project-migration.
-  //
-  // It is encouraged to share logic between onAttachedToEngine and registerWith to keep
-  // them functionally equivalent. Only one of onAttachedToEngine or registerWith will be called
-  // depending on the user's project. onAttachedToEngine or registerWith must both be defined
-  // in the same class.
+  // flutter 1.12之前会自动调用registerWith，1.12之后走onAttachedToEngine
   companion object {
     protected var activity: Activity? = null
     fun registerWith(registrar: Registrar) {
@@ -39,53 +38,62 @@ open class MusicPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
     }
   }
 
-  @TargetApi(VERSION_CODES.M) fun requestPermission(): Boolean {
+  private fun requestPermission(): Boolean {
     activity ?: return false
     val code =
-      activity!!.checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) + activity!!.checkSelfPermission(
-        Manifest.permission.READ_EXTERNAL_STORAGE
-      )
-    if (code != 0) {
-      activity!!.requestPermissions(
-        arrayOf(
-          Manifest.permission.WRITE_EXTERNAL_STORAGE,
+      if (VERSION.SDK_INT >= VERSION_CODES.M) {
+        activity!!.checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) + activity!!.checkSelfPermission(
           Manifest.permission.READ_EXTERNAL_STORAGE
-        ), 1
-      )
+        )
+      } else {
+        // VERSION.SDK_INT < M
+        0
+      }
+    if (code != 0) {
+      if (VERSION.SDK_INT >= VERSION_CODES.M) {
+        activity!!.requestPermissions(
+          arrayOf(
+            Manifest.permission.WRITE_EXTERNAL_STORAGE,
+            Manifest.permission.READ_EXTERNAL_STORAGE
+          ), 1
+        )
+      }
     } else {
       return true
     }
     return false
   }
 
+  private fun playSong(map: Map<String, String>) {
+    val info = SongInfo()
+    info.songId = map["songId"] ?: ""
+    info.songUrl = map["songUrl"] ?: ""
+    StarrySky.with().playMusicByInfo(info)
+  }
+
   override fun onMethodCall(call: MethodCall, result: Result) {
+    Log.d("MusicPlugin", "onMethodCall ${call.method}")
     StarrySky.init(activity!!.application)
-    if (call.method == "getPlatformVersion") {
-      if (requestPermission()) {
-        val info = SongInfo()
-        info.songId = "111"
-        info.songUrl =
-          "https://webfs.yun.kugou.com/202003241405/b115cd03e8cc3e479f7b5a2158546f1a/G164/M01/1F/09/RIcBAF1FXz6AImQhAC0SISFl4Mw962.mp3"
-        StarrySky.with().playMusicByInfo(info)
-        result.success("New Android 12")
-      } else {
-        result.success("not Permission")
-      }
-    } else {
-      result.notImplemented()
+    when (call.method) {
+      "playSong" -> playSong(call.arguments as Map<String, String>)
+      else -> result.notImplemented()
     }
   }
 
   override fun onDetachedFromEngine(binding: FlutterPlugin.FlutterPluginBinding) {
+    Log.d("MusicPlugin", "onDetachedFromEngine")
   }
 
   override fun onDetachedFromActivity() {
+    Log.d("MusicPlugin", "onDetachedFromActivity")
+    activity = null
   }
 
   override fun onReattachedToActivityForConfigChanges(p0: ActivityPluginBinding) {
   }
 
   override fun onAttachedToActivity(p0: ActivityPluginBinding) {
+    Log.d("MusicPlugin", "onAttachedToActivity ${p0.activity.localClassName}")
     activity = p0.activity
   }
 
