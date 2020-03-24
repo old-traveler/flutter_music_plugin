@@ -2,10 +2,14 @@ import 'dart:async';
 
 import 'package:flutter/services.dart';
 
-class Music {
-  static const MethodChannel _channel = const MethodChannel('music');
+class MusicWrapper {
+  static MusicWrapper _wrapper;
 
-  static Future<String> playSong(String songId, String songUrl) async {
+  MethodChannel _channel = const MethodChannel('music');
+
+  static MusicWrapper get singleton => _wrapper ??= MusicWrapper();
+
+  Future<String> playSong(String songId, String songUrl) async {
     final String version = await _channel
         .invokeMethod('playSong', {'songId': songId, 'songUrl': songUrl});
     return version;
