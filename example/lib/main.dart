@@ -17,7 +17,21 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
+    MusicWrapper.singleton.initState();
+    MusicWrapper.singleton.getMusicStateStream().listen((event) {
+      if (!mounted) return;
+      setState(() {
+        _platformVersion =
+            'is Playing now position is ${event.data['position']}';
+      });
+    });
 //    initPlatformState();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    MusicWrapper.singleton.dispose();
   }
 
   // Platform messages are asynchronous, so we initialize in an async method.

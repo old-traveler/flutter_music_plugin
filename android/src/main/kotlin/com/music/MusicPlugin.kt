@@ -1,7 +1,6 @@
 package com.music
 
 import android.Manifest
-import android.annotation.TargetApi
 import android.app.Activity
 import android.os.Build.VERSION
 import android.os.Build.VERSION_CODES
@@ -21,8 +20,6 @@ import io.flutter.plugin.common.PluginRegistry.Registrar
 @Suppress("UNCHECKED_CAST")
 open class MusicPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
 
-  private lateinit var mChannel: MethodChannel
-
   override fun onAttachedToEngine(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
     mChannel = MethodChannel(flutterPluginBinding.binaryMessenger, "music")
     mChannel.setMethodCallHandler(MusicPlugin())
@@ -32,6 +29,7 @@ open class MusicPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
   // flutter 1.12之前会自动调用registerWith，1.12之后走onAttachedToEngine
   companion object {
     protected var activity: Activity? = null
+    lateinit var mChannel: MethodChannel
     fun registerWith(registrar: Registrar) {
       val channel = MethodChannel(registrar.messenger(), "music")
       channel.setMethodCallHandler(MusicPlugin())
@@ -76,8 +74,19 @@ open class MusicPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
     StarrySky.init(activity!!.application)
     when (call.method) {
       "playSong" -> playSong(call.arguments as Map<String, String>)
+      "registerStateListener" -> registerStateListener()
+      "unregisterStateListener" -> unregisterStateListener()
       else -> result.notImplemented()
     }
+    result.success("true")
+  }
+
+  private fun registerStateListener() {
+    MusicStateManager.register()
+  }
+
+  private fun unregisterStateListener() {
+    MusicStateManager.unregister()
   }
 
   override fun onDetachedFromEngine(binding: FlutterPlugin.FlutterPluginBinding) {
