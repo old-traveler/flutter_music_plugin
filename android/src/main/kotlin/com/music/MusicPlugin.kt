@@ -8,10 +8,10 @@ import io.flutter.plugin.common.MethodChannel.Result
 import io.flutter.plugin.common.PluginRegistry.Registrar
 
 /** MusicPlugin */
-public class MusicPlugin : FlutterPlugin, MethodCallHandler {
+class MusicPlugin : FlutterPlugin, MethodCallHandler {
   override fun onAttachedToEngine(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
-    val channel = MethodChannel(flutterPluginBinding.getFlutterEngine().getDartExecutor(), "music")
-    channel.setMethodCallHandler(MusicPlugin());
+    val channel = MethodChannel(flutterPluginBinding.binaryMessenger, "music")
+    channel.setMethodCallHandler(MusicPlugin())
   }
 
   // This static function is optional and equivalent to onAttachedToEngine. It supports the old
