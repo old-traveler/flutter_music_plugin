@@ -17,7 +17,7 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
-    initPlatformState();
+//    initPlatformState();
   }
 
   // Platform messages are asynchronous, so we initialize in an async method.
@@ -47,8 +47,13 @@ class _MyAppState extends State<MyApp> {
         appBar: AppBar(
           title: const Text('Plugin example app'),
         ),
-        body: Center(
-          child: Text('Running on: $_platformVersion\n'),
+        body: GestureDetector(
+          child: Center(
+            child: Text('Running on: $_platformVersion\n'),
+          ),
+          onTap: (){
+            initPlatformState();
+          },
         ),
       ),
     );

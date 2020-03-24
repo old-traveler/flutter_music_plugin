@@ -1,6 +1,15 @@
 package com.music
 
+import android.Manifest
+import android.annotation.TargetApi
+import android.app.Activity
+import android.os.Build.VERSION
+import android.os.Build.VERSION_CODES
+import android.util.Log
+import com.music.util.MusicUtils
 import io.flutter.embedding.engine.plugins.FlutterPlugin
+import io.flutter.embedding.engine.plugins.activity.ActivityAware
+import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
 import io.flutter.plugin.common.MethodCall
 import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
@@ -8,7 +17,7 @@ import io.flutter.plugin.common.MethodChannel.Result
 import io.flutter.plugin.common.PluginRegistry.Registrar
 
 /** MusicPlugin */
-class MusicPlugin : FlutterPlugin, MethodCallHandler {
+open class MusicPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
   override fun onAttachedToEngine(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
     val channel = MethodChannel(flutterPluginBinding.binaryMessenger, "music")
     channel.setMethodCallHandler(MusicPlugin())
@@ -24,20 +33,62 @@ class MusicPlugin : FlutterPlugin, MethodCallHandler {
   // depending on the user's project. onAttachedToEngine or registerWith must both be defined
   // in the same class.
   companion object {
+    protected var activity: Activity? = null
     fun registerWith(registrar: Registrar) {
       val channel = MethodChannel(registrar.messenger(), "music")
       channel.setMethodCallHandler(MusicPlugin())
     }
   }
 
+  @TargetApi(VERSION_CODES.M) fun requestPermission(): Boolean {
+
+    activity ?: return false
+    val code =
+      activity!!.checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) + activity!!.checkSelfPermission(
+        Manifest.permission.READ_EXTERNAL_STORAGE
+      )
+    if (code != 0) {
+      activity!!.requestPermissions(
+        arrayOf(
+          Manifest.permission.WRITE_EXTERNAL_STORAGE,
+          Manifest.permission.READ_EXTERNAL_STORAGE
+        ), 1
+      )
+    } else {
+      return true
+    }
+    return false
+  }
+
   override fun onMethodCall(call: MethodCall, result: Result) {
     if (call.method == "getPlatformVersion") {
-      result.success("New Android ${android.os.Build.VERSION.RELEASE}")
+      if (requestPermission()) {
+        MusicUtils.getIntance().init(activity)
+        result.success("New Android ${MusicUtils.getIntance().songListJson}")
+      } else {
+        result.success("not Permission")
+      }
     } else {
       result.notImplemented()
     }
   }
 
   override fun onDetachedFromEngine(binding: FlutterPlugin.FlutterPluginBinding) {
+  }
+
+  override fun onDetachedFromActivity() {
+  }
+
+  override fun onReattachedToActivityForConfigChanges(p0: ActivityPluginBinding) {
+  }
+
+
+
+  override fun onAttachedToActivity(p0: ActivityPluginBinding) {
+    activity = p0.activity
+    Log.d("Plugin","给activity负值${activity?.localClassName}")
+  }
+
+  override fun onDetachedFromActivityForConfigChanges() {
   }
 }
