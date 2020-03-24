@@ -48,6 +48,10 @@ class MusicWrapper {
     print(result);
   }
 
+  void seekTo(int position) async {
+    _channel.invokeMethod('seekTo',position);
+  }
+
   void initState() {
     _controller?.close();
     _controller ??= StreamController.broadcast();

@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'dart:async';
 
@@ -13,14 +15,23 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   String _platformVersion = 'Unknown';
+  double progress = 0;
+  double maxProgress = 1;
+  String _duration = '0s';
+  bool isChange = false;
 
   @override
   void initState() {
     super.initState();
     MusicWrapper.singleton.initState();
     MusicWrapper.singleton.getMusicStateStream().listen((event) {
-      if (!mounted) return;
+      if (!mounted || isChange ) return;
       setState(() {
+        maxProgress = event.data['duration'] * 1.0;
+        progress = min(event.data['position'] * 1.0, maxProgress);
+        _duration = '${progress~/1000}s';
+        print('$progress   $maxProgress  $_duration');
+
         _platformVersion =
             'is Playing now position is ${event.data['position']}';
       });
@@ -62,13 +73,38 @@ class _MyAppState extends State<MyApp> {
         appBar: AppBar(
           title: const Text('Plugin example app'),
         ),
-        body: GestureDetector(
-          child: Center(
-            child: Text('Running on: $_platformVersion\n'),
+        body: Center(
+          child: Column(
+            children: <Widget>[
+              FlatButton(
+                child: Text('点击播放'),
+                onPressed: () {
+                  initPlatformState();
+                },
+              ),
+              Slider(
+                value: progress,
+                label: _duration,
+                min: 0.0,
+                max: maxProgress,
+                divisions: 1000000,
+                activeColor: Colors.blue,
+                onChanged: (value){
+                  setState(() {
+                    progress = value;
+                    _duration = '${progress~/1000}s';
+                  });
+                },onChangeEnd: (value){
+                  setState(() {
+                    MusicWrapper.singleton.seekTo(value.toInt());
+                    isChange = false;
+                  });
+              },onChangeStart: (value){
+                isChange = true;
+              },
+              )
+            ],
           ),
-          onTap: () {
-            initPlatformState();
-          },
         ),
       ),
     );

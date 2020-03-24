@@ -71,22 +71,31 @@ open class MusicPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
 
   override fun onMethodCall(call: MethodCall, result: Result) {
     Log.d("MusicPlugin", "onMethodCall ${call.method}")
-    StarrySky.init(activity!!.application)
     when (call.method) {
       "playSong" -> playSong(call.arguments as Map<String, String>)
       "registerStateListener" -> registerStateListener()
       "unregisterStateListener" -> unregisterStateListener()
+      "seekTo" -> seekTo((call.arguments as Int).toLong())
       else -> result.notImplemented()
     }
     result.success("true")
   }
 
+  private fun seekTo(positon: Long) {
+    val sky = StarrySky.with()
+    if (sky.isPlaying()) {
+      sky.seekTo(positon)
+    }
+  }
+
   private fun registerStateListener() {
+    StarrySky.init(activity!!.application)
     MusicStateManager.register()
   }
 
   private fun unregisterStateListener() {
     MusicStateManager.unregister()
+    StarrySky.with().stopMusic()
   }
 
   override fun onDetachedFromEngine(binding: FlutterPlugin.FlutterPluginBinding) {

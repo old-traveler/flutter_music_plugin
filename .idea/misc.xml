@@ -8,4 +8,11 @@
   <component name="ProjectType">
     <option name="id" value="io.flutter" />
   </component>
+  <component name="SuppressABINotification">
+    <option name="modulesWithSuppressedNotConfigured">
+      <set>
+        <option value="music_android" />
+      </set>
+    </option>
+  </component>
 </project>
