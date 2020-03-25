@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:flutter/services.dart';
 
@@ -20,6 +21,12 @@ class MusicState {
     this.duration = map['duration'];
     this.buffered = map['buffered'];
     this.error = map['error'];
+    this.duration = max(0, duration);
+    assert(duration >= 0);
+    this.position = max(0, min(position, duration));
+    assert(position >= 0 && position <= duration);
+    this.buffered = max(0, min(buffered, duration));
+    assert(buffered >= 0 && buffered <= duration);
   }
 }
 

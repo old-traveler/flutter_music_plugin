@@ -20,6 +20,7 @@ class _MyAppState extends State<MyApp> {
   String _duration = '0s';
   bool isChange = false;
   int state = 0;
+
   @override
   void initState() {
     super.initState();
@@ -28,8 +29,8 @@ class _MyAppState extends State<MyApp> {
       if (!mounted || isChange) return;
       setState(() {
         state = event.state;
-        maxProgress = event.duration * 1.0;
-        progress = min(event.position * 1.0, maxProgress);
+        maxProgress = max(0, event.duration * 1.0);
+        progress = max(0, min(event.position * 1.0, maxProgress));
         _duration = '${progress ~/ 1000}s';
         print('$progress   $maxProgress  $_duration');
         _platformVersion = 'is Playing now position is ${event.position}';
@@ -89,7 +90,7 @@ class _MyAppState extends State<MyApp> {
                 divisions: 1000000,
                 activeColor: Colors.blue,
                 onChanged: (value) {
-                  if(!state.canSeekTo()){
+                  if (!state.canSeekTo()) {
                     return;
                   }
                   setState(() {
@@ -98,7 +99,7 @@ class _MyAppState extends State<MyApp> {
                   });
                 },
                 onChangeEnd: (value) {
-                  if(!state.canSeekTo()){
+                  if (!state.canSeekTo()) {
                     return;
                   }
                   setState(() {
@@ -107,7 +108,7 @@ class _MyAppState extends State<MyApp> {
                   });
                 },
                 onChangeStart: (value) {
-                  if(!state.canSeekTo()){
+                  if (!state.canSeekTo()) {
                     return;
                   }
                   isChange = true;
