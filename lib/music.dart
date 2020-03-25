@@ -145,6 +145,10 @@ class MusicWrapper {
     _channel.invokeMethod('playNebOrPreviousSong', false);
   }
 
+  void prepareFromSongId({String songId}) {
+    _channel.invokeMethod('prepareFromSongId', songId);
+  }
+
   Future<int> getState() async {
     return await _channel.invokeMethod<int>('getState');
   }
