@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'dart:async';
 
 import 'package:flutter/services.dart';
-import 'package:music/music.dart';
+import 'package:flutter_music_plugin/music.dart';
 
 void main() => runApp(MyApp());
 
@@ -51,7 +51,7 @@ class _MyAppState extends State<MyApp> {
     // Platform messages may fail, so we use a try/catch PlatformException.
     try {
       platformVersion = await MusicWrapper.singleton.playSong('111',
-          "https://webfs.yun.kugou.com/202003241405/b115cd03e8cc3e479f7b5a2158546f1a/G164/M01/1F/09/RIcBAF1FXz6AImQhAC0SISFl4Mw962.mp3");
+          "https://webfs.yun.kugou.com/202003251525/f977d1f1c39f97f737ade0c02fde13ab/G164/M01/1F/09/RIcBAF1FXz6AImQhAC0SISFl4Mw962.mp3");
     } on PlatformException {
       platformVersion = 'Failed to play music.';
     }
