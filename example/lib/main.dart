@@ -19,21 +19,20 @@ class _MyAppState extends State<MyApp> {
   double maxProgress = 1;
   String _duration = '0s';
   bool isChange = false;
-
+  int state = 0;
   @override
   void initState() {
     super.initState();
     MusicWrapper.singleton.initState();
     MusicWrapper.singleton.getMusicStateStream().listen((event) {
-      if (!mounted || isChange ) return;
+      if (!mounted || isChange) return;
       setState(() {
-        maxProgress = event.data['duration'] * 1.0;
-        progress = min(event.data['position'] * 1.0, maxProgress);
-        _duration = '${progress~/1000}s';
+        state = event.state;
+        maxProgress = event.duration * 1.0;
+        progress = min(event.position * 1.0, maxProgress);
+        _duration = '${progress ~/ 1000}s';
         print('$progress   $maxProgress  $_duration');
-
-        _platformVersion =
-            'is Playing now position is ${event.data['position']}';
+        _platformVersion = 'is Playing now position is ${event.position}';
       });
     });
 //    initPlatformState();
@@ -89,19 +88,30 @@ class _MyAppState extends State<MyApp> {
                 max: maxProgress,
                 divisions: 1000000,
                 activeColor: Colors.blue,
-                onChanged: (value){
+                onChanged: (value) {
+                  if(!state.canSeekTo()){
+                    return;
+                  }
                   setState(() {
                     progress = value;
-                    _duration = '${progress~/1000}s';
+                    _duration = '${progress ~/ 1000}s';
                   });
-                },onChangeEnd: (value){
+                },
+                onChangeEnd: (value) {
+                  if(!state.canSeekTo()){
+                    return;
+                  }
                   setState(() {
                     MusicWrapper.singleton.seekTo(value.toInt());
                     isChange = false;
                   });
-              },onChangeStart: (value){
-                isChange = true;
-              },
+                },
+                onChangeStart: (value) {
+                  if(!state.canSeekTo()){
+                    return;
+                  }
+                  isChange = true;
+                },
               )
             ],
           ),

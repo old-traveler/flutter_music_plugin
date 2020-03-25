@@ -26,17 +26,22 @@ object MusicStateManager : OnPlayerEventListener {
   }
 
   fun onProgressChange() {
-    val arguments = mutableMapOf<String, Any>()
-    arguments["type"] = "progress"
-    val map = mutableMapOf<String, Any>()
-    map["position"] = StarrySky.with().getPlayingPosition()
-    map["duration"] = StarrySky.with().getDuration()
-    map["buffered"] = StarrySky.with().getBufferedPosition()
-    arguments["data"] = map
-    MusicPlugin.mChannel.invokeMethod("onStateChange", arguments)
+    sendStateMessage()
     if (hasRegister && StarrySky.with().isPlaying()) {
       startProgress()
     }
+  }
+
+  private fun sendStateMessage() {
+    val arguments = mutableMapOf<String, Any>()
+    StarrySky.with().apply {
+      arguments["state"] = getState()
+      arguments["position"] = getPlayingPosition()
+      arguments["duration"] = getDuration()
+      arguments["buffered"] = getBufferedPosition()
+      arguments["error"] = getErrorCode()
+    }
+    MusicPlugin.mChannel.invokeMethod("onStateChange", arguments)
   }
 
   fun register() {
@@ -51,21 +56,27 @@ object MusicStateManager : OnPlayerEventListener {
   }
 
   override fun onBuffering() {
+    sendStateMessage()
   }
 
   override fun onError(errorCode: Int, errorMsg: String) {
+    sendStateMessage()
   }
 
   override fun onMusicSwitch(songInfo: SongInfo) {
+    sendStateMessage()
   }
 
   override fun onPlayCompletion(songInfo: SongInfo) {
+    sendStateMessage()
   }
 
   override fun onPlayerPause() {
+    sendStateMessage()
   }
 
   override fun onPlayerStart() {
+    sendStateMessage()
     startProgress()
   }
 
@@ -74,6 +85,7 @@ object MusicStateManager : OnPlayerEventListener {
   }
 
   override fun onPlayerStop() {
+    sendStateMessage()
   }
 
 }
