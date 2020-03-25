@@ -67,9 +67,9 @@ open class MusicPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
     info.songId = map["songId"] ?: ""
     info.songUrl = map["songUrl"] ?: ""
     val sky = StarrySky.with()
-    if (!sky.isCurrMusicIsPlayingMusic(info.songId)){
+    if (!sky.isCurrMusicIsPlayingMusic(info.songId)) {
       sky.playMusicByInfo(info)
-    } else if (sky.isIdea()){
+    } else if (sky.isIdea()) {
       sky.removeSongInfo(info.songId)
       val originId = info.songId
       info.songId = info.songId + "copy"
@@ -79,20 +79,56 @@ open class MusicPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
       info.songId = originId
       sky.playMusicByInfo(info)
     }
-    Log.d("playSong","${info.songId} is playing ${sky.isIdea()}")
+    Log.d("playSong", "${info.songId} is playing ${sky.isIdea()}")
 
   }
 
   override fun onMethodCall(call: MethodCall, result: Result) {
     Log.d("MusicPlugin", "onMethodCall ${call.method}")
+    var resultData : Any? = "true"
     when (call.method) {
       "playSong" -> playSong(call.arguments as Map<String, String>)
       "registerStateListener" -> registerStateListener()
       "unregisterStateListener" -> unregisterStateListener()
       "seekTo" -> seekTo((call.arguments as Int).toLong())
+      "playOrPauseMusic" -> playOrPauseMusic()
+      "playMusicById" -> playMusicById(call.arguments as String)
+      "loadMusicList" -> loadMusicList(call.arguments as Map<String, Any>)
+      "playNebOrPreviousSong" -> playNebOrPreviousSong(call.arguments as Boolean)
+      "getState" -> resultData = StarrySky.with().getState()
       else -> result.notImplemented()
     }
-    result.success("true")
+    result.success(resultData)
+  }
+
+  private fun playNebOrPreviousSong(next: Boolean) {
+    if (next) {
+      StarrySky.with().skipToNext()
+    } else {
+      StarrySky.with().skipToPrevious()
+    }
+  }
+
+  private fun playMusicById(songId: String) {
+    StarrySky.with().playMusicById(songId)
+  }
+
+  private fun loadMusicList(map: Map<String, Any>) {
+    val index = map["index"] as Int
+    val songList = map["songList"] as List<List<String>>
+    val songInfoList: List<SongInfo> = songList.map {
+      SongInfo(songId = it[0], songUrl = it[1])
+    }
+    StarrySky.with().playMusic(songInfoList, index)
+  }
+
+  private fun playOrPauseMusic() {
+    val sky = StarrySky.with()
+    if (sky.isPaused()) {
+      sky.restoreMusic()
+    } else if (sky.isPlaying()) {
+      sky.pauseMusic()
+    }
   }
 
   private fun seekTo(position: Long) {

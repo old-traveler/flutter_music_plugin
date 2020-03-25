@@ -77,6 +77,13 @@ extension MusicStateProvider on int {
   }
 }
 
+class SongInfo {
+  String songId;
+  String songUrl;
+
+  SongInfo(this.songId, this.songUrl);
+}
+
 class MusicWrapper {
   static MusicWrapper _wrapper;
   List<MusicStateListener> stateListeners = [];
@@ -112,6 +119,34 @@ class MusicWrapper {
 
   void seekTo(int position) async {
     _channel.invokeMethod('seekTo', position);
+  }
+
+  void playOrPauseMusic() {
+    _channel.invokeMethod('playOrPauseMusic');
+  }
+
+  void loadMusicList({List<SongInfo> list, int index = 0}) {
+    final dataList = list.map<List<String>>((info) {
+      return [info.songId, info.songUrl];
+    });
+    Map map = {'index': index, 'songList': dataList};
+    _channel.invokeMethod('loadMusicList', map);
+  }
+
+  void playMusicById(String songId) {
+    _channel.invokeMethod('playMusicById', songId);
+  }
+
+  void playNextSong() {
+    _channel.invokeMethod('playNebOrPreviousSong', true);
+  }
+
+  void playPreviousSong() {
+    _channel.invokeMethod('playNebOrPreviousSong', false);
+  }
+
+  Future<int> getState() async {
+    return await _channel.invokeMethod<int>('getState');
   }
 
   void initState() {
