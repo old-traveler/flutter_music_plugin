@@ -11,6 +11,7 @@ class MusicState {
   int duration;
   int buffered;
   int error;
+  String songId;
 
   MusicState(
       {this.state, this.position, this.duration, this.buffered, this.error});
@@ -21,6 +22,7 @@ class MusicState {
     this.duration = map['duration'];
     this.buffered = map['buffered'];
     this.error = map['error'];
+    this.songId = map['songId'];
     this.duration = max(0, duration);
     assert(duration >= 0);
     this.position = max(0, min(position, duration));
@@ -105,6 +107,10 @@ class MusicWrapper {
     final String version = await _channel
         .invokeMethod('playSong', {'songId': songId, 'songUrl': songUrl});
     return version;
+  }
+
+  void playSongByInfo(SongInfo info) {
+    playSong(info.songId, info.songUrl);
   }
 
   void _registerStateListener() async {

@@ -1,4 +1,4 @@
-package com.music
+package com.plugin
 
 import android.annotation.SuppressLint
 import android.os.Handler
@@ -33,13 +33,14 @@ object MusicStateManager : OnPlayerEventListener {
   }
 
   private fun sendStateMessage() {
-    val arguments = mutableMapOf<String, Any>()
+    val arguments = mutableMapOf<String, Any?>()
     StarrySky.with().apply {
       arguments["state"] = getState()
       arguments["position"] = getPlayingPosition()
       arguments["duration"] = getDuration()
       arguments["buffered"] = getBufferedPosition()
       arguments["error"] = getErrorCode()
+      arguments["songId"] = getNowPlayingSongInfo()?.songId
     }
     MusicPlugin.mChannel.invokeMethod("onStateChange", arguments)
   }

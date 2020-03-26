@@ -1,4 +1,4 @@
-group 'com.music'
+group 'com.plugin'
 version '1.0-SNAPSHOT'
 
 buildscript {

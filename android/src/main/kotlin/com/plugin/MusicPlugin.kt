@@ -1,4 +1,4 @@
-package com.music
+package com.plugin
 
 import android.Manifest
 import android.app.Activity
