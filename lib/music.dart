@@ -96,8 +96,6 @@ class MusicWrapper {
   MethodChannel _channel = const MethodChannel('music')
     ..setMethodCallHandler((methodCall) {
       if ('onStateChange' == methodCall.method) {
-        MusicState state = MusicState.formMap(methodCall.arguments);
-        print("state ${state.state}");
         _wrapper._controller.add(MusicState.formMap(methodCall.arguments));
       }
       return Future.value(true);
