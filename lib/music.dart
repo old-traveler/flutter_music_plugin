@@ -97,7 +97,7 @@ class MusicWrapper {
     ..setMethodCallHandler((methodCall) {
       if ('onStateChange' == methodCall.method) {
         MusicState state = MusicState.formMap(methodCall.arguments);
-        print(state);
+        print("state ${state.state}");
         _wrapper._controller.add(MusicState.formMap(methodCall.arguments));
       }
       return Future.value(true);

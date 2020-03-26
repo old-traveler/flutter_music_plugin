@@ -2,10 +2,13 @@ package com.plugin
 
 import android.Manifest
 import android.app.Activity
+import android.content.Context
 import android.os.Build.VERSION
 import android.os.Build.VERSION_CODES
 import android.util.Log
 import com.lzx.starrysky.StarrySky
+import com.lzx.starrysky.StarrySkyBuilder
+import com.lzx.starrysky.StarrySkyConfig
 import com.lzx.starrysky.provider.SongInfo
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.embedding.engine.plugins.activity.ActivityAware
@@ -85,7 +88,10 @@ open class MusicPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
 
   override fun onMethodCall(call: MethodCall, result: Result) {
     Log.d("MusicPlugin", "onMethodCall ${call.method}")
-    var resultData : Any? = "true"
+    if (!requestPermission()){
+      result.success("没有权限")
+    }
+    var resultData: Any? = "true"
     when (call.method) {
       "playSong" -> playSong(call.arguments as Map<String, String>)
       "registerStateListener" -> registerStateListener()
@@ -148,7 +154,12 @@ open class MusicPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
   }
 
   private fun registerStateListener() {
-    StarrySky.init(activity!!.application)
+    StarrySky.init(activity!!.application, object : StarrySkyConfig() {
+      override fun applyOptions(context: Context, builder: StarrySkyBuilder) {
+        super.applyOptions(context, builder)
+        builder.setOpenCache(true)
+      }
+    })
     MusicStateManager.register()
   }
 
