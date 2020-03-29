@@ -148,7 +148,7 @@ open class MusicPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
 
   private fun seekTo(position: Long) {
     val sky = StarrySky.with()
-    if (sky.isPlaying()) {
+    if (sky.isPlaying() || sky.isPaused()) {
       sky.seekTo(position)
     }
   }
