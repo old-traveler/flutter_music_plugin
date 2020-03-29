@@ -82,8 +82,9 @@ extension MusicStateProvider on int {
 class SongInfo {
   String songId;
   String songUrl;
+  int duration;
 
-  SongInfo(this.songId, this.songUrl);
+  SongInfo(this.songId, this.songUrl, {this.duration = -1});
 }
 
 class MusicWrapper {
@@ -101,14 +102,15 @@ class MusicWrapper {
       return Future.value(true);
     });
 
-  Future<String> playSong(String songId, String songUrl) async {
-    final String version = await _channel
-        .invokeMethod('playSong', {'songId': songId, 'songUrl': songUrl});
+  Future<String> playSong(String songId, String songUrl,
+      {int duration = -1}) async {
+    final String version = await _channel.invokeMethod('playSong',
+        {'songId': songId, 'songUrl': songUrl, 'duration': duration});
     return version;
   }
 
   void playSongByInfo(SongInfo info) {
-    playSong(info.songId, info.songUrl);
+    playSong(info.songId, info.songUrl, duration: info.duration);
   }
 
   void _registerStateListener() async {

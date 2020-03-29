@@ -26,6 +26,14 @@ object MusicStateManager : OnPlayerEventListener {
   }
 
   fun onProgressChange() {
+    val sky = StarrySky.with()
+    if (sky.getPlayingPosition() > 0 && sky.getPlayingPosition() > sky.getDuration()) {
+      if (sky.isSkipToNextEnabled() && sky.getPlayList().size > 1) {
+        sky.skipToNext()
+      } else {
+        sky.stopMusic()
+      }
+    }
     sendStateMessage()
     if (hasRegister && StarrySky.with().isPlaying()) {
       startProgress()

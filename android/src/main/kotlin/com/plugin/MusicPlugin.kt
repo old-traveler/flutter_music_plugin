@@ -5,6 +5,7 @@ import android.app.Activity
 import android.content.Context
 import android.os.Build.VERSION
 import android.os.Build.VERSION_CODES
+import android.support.v4.media.session.PlaybackStateCompat
 import android.util.Log
 import com.lzx.starrysky.StarrySky
 import com.lzx.starrysky.StarrySkyBuilder
@@ -65,10 +66,11 @@ open class MusicPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
     return false
   }
 
-  private fun playSong(map: Map<String, String>) {
+  private fun playSong(map: Map<String, Any?>) {
     val info = SongInfo()
-    info.songId = map["songId"] ?: ""
-    info.songUrl = map["songUrl"] ?: ""
+    info.songId = map["songId"] as String? ?: ""
+    info.songUrl = map["songUrl"] as String? ?: ""
+    info.duration = (map["duration"] as Int? ?: -1).toLong()
     val sky = StarrySky.with()
     if (!sky.isCurrMusicIsPlayingMusic(info.songId)) {
       sky.playMusicByInfo(info)
@@ -93,7 +95,7 @@ open class MusicPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
     }
     var resultData: Any? = "true"
     when (call.method) {
-      "playSong" -> playSong(call.arguments as Map<String, String>)
+      "playSong" -> playSong(call.arguments as Map<String, Any?>)
       "registerStateListener" -> registerStateListener()
       "unregisterStateListener" -> unregisterStateListener()
       "seekTo" -> seekTo((call.arguments as Int).toLong())
@@ -143,6 +145,18 @@ open class MusicPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
       sky.restoreMusic()
     } else if (sky.isPlaying()) {
       sky.pauseMusic()
+    } else if (sky.isIdea() && sky.getNowPlayingSongInfo() != null){
+      val info = sky.getNowPlayingSongInfo()!!
+      sky.removeSongInfo(info.songId)
+      val originId = info.songId
+      info.songId = info.songId + "copy"
+      sky.playMusicByInfo(info)
+      sky.stopMusic()
+      sky.removeSongInfo(info.songId)
+      info.songId = originId
+      sky.playMusicByInfo(info)
+    } else if (sky.getState() == PlaybackStateCompat.STATE_STOPPED && sky.getNowPlayingSongInfo() != null){
+      sky.playMusicById(sky.getNowPlayingSongInfo().songId!!)
     }
   }
 
