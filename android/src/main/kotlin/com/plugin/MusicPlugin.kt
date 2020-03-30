@@ -156,7 +156,7 @@ open class MusicPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
       info.songId = originId
       sky.playMusicByInfo(info)
     } else if (sky.getState() == PlaybackStateCompat.STATE_STOPPED && sky.getNowPlayingSongInfo() != null){
-      sky.playMusicById(sky.getNowPlayingSongInfo().songId!!)
+      sky.playMusicById(sky.getNowPlayingSongInfo()?.songId!!)
     }
   }
 

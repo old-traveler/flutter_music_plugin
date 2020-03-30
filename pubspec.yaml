@@ -1,8 +1,7 @@
 name: flutter_music_plugin
 description: A new Flutter plugin for music
-version: 0.0.1
-author:
-homepage:
+version: 0.0.2
+homepage: https://github.com/old-traveler/flutter_music_plugin
 
 environment:
   sdk: ">=2.6.0 <3.0.0"
