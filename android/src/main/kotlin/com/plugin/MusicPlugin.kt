@@ -105,9 +105,14 @@ open class MusicPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
       "playNebOrPreviousSong" -> playNebOrPreviousSong(call.arguments as Boolean)
       "getState" -> resultData = StarrySky.with().getState()
       "prepareFromSongId" -> prepareFromSongId(call.arguments as? String?)
+      "getPlayListSongId" -> resultData = getPlayListSongId()
       else -> result.notImplemented()
     }
     result.success(resultData)
+  }
+
+  private fun getPlayListSongId(): List<String>? {
+    return StarrySky.with().getPlayList().map { it.songId }
   }
 
   private fun prepareFromSongId(songId: String?) {

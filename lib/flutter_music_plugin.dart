@@ -171,5 +171,9 @@ class MusicWrapper {
     _controller = null;
   }
 
+  Future<List<dynamic>> getPlayListSongId() {
+    return _channel.invokeMethod<List<dynamic>>('getPlayListSongId');
+  }
+
   Stream<MusicState> getMusicStateStream() => _controller?.stream;
 }
