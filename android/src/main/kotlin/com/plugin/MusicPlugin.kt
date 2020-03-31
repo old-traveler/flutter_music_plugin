@@ -90,7 +90,7 @@ open class MusicPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
 
   override fun onMethodCall(call: MethodCall, result: Result) {
     Log.d("MusicPlugin", "onMethodCall ${call.method}")
-    if (!requestPermission()){
+    if (!requestPermission()) {
       result.success("没有权限")
     }
     var resultData: Any? = "true"
@@ -106,9 +106,14 @@ open class MusicPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
       "getState" -> resultData = StarrySky.with().getState()
       "prepareFromSongId" -> prepareFromSongId(call.arguments as? String?)
       "getPlayListSongId" -> resultData = getPlayListSongId()
+      "setPlayMusicMode" -> setPlayMusicMode(call.arguments as Int)
       else -> result.notImplemented()
     }
     result.success(resultData)
+  }
+
+  private fun setPlayMusicMode(mode: Int) {
+    return StarrySky.with().setRepeatMode(mode)
   }
 
   private fun getPlayListSongId(): List<String>? {
@@ -150,7 +155,7 @@ open class MusicPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
       sky.restoreMusic()
     } else if (sky.isPlaying()) {
       sky.pauseMusic()
-    } else if (sky.isIdea() && sky.getNowPlayingSongInfo() != null){
+    } else if (sky.isIdea() && sky.getNowPlayingSongInfo() != null) {
       val info = sky.getNowPlayingSongInfo()!!
       sky.removeSongInfo(info.songId)
       val originId = info.songId
@@ -160,7 +165,7 @@ open class MusicPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
       sky.removeSongInfo(info.songId)
       info.songId = originId
       sky.playMusicByInfo(info)
-    } else if (sky.getState() == PlaybackStateCompat.STATE_STOPPED && sky.getNowPlayingSongInfo() != null){
+    } else if (sky.getState() == PlaybackStateCompat.STATE_STOPPED && sky.getNowPlayingSongInfo() != null) {
       sky.playMusicById(sky.getNowPlayingSongInfo()?.songId!!)
     }
   }

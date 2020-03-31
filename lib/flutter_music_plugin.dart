@@ -72,6 +72,17 @@ class MusicStateType {
   static const int PLAYBACK_POSITION_UNKNOWN = -1;
 }
 
+class MusicPlayMode {
+  /// 顺序播放
+  static const int REPEAT_MODE_NONE = 0;
+
+  /// 单曲循环
+  static const int REPEAT_MODE_ONE = 1;
+
+  /// 列表循环
+  static const int REPEAT_MODE_ALL = 2;
+}
+
 extension MusicStateProvider on int {
   canSeekTo() {
     return this == MusicStateType.STATE_PLAYING ||
@@ -129,6 +140,10 @@ class MusicWrapper {
 
   void playOrPauseMusic() {
     _channel.invokeMethod('playOrPauseMusic');
+  }
+
+  void setPlayMusicMode(int mode) {
+    _channel.invokeMethod('setPlayMusicMode', mode);
   }
 
   void loadMusicList({List<SongInfo> list, int index = 0}) {
