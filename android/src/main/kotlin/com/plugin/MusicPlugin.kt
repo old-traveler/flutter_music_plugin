@@ -2,11 +2,16 @@ package com.plugin
 
 import android.Manifest
 import android.app.Activity
+import android.app.DownloadManager
+import android.app.DownloadManager.Request
 import android.content.Context
+import android.net.Uri
 import android.os.Build.VERSION
 import android.os.Build.VERSION_CODES
+import android.os.Environment
 import android.support.v4.media.session.PlaybackStateCompat
 import android.util.Log
+import android.widget.Toast
 import com.lzx.starrysky.StarrySky
 import com.lzx.starrysky.StarrySkyBuilder
 import com.lzx.starrysky.StarrySkyConfig
@@ -19,6 +24,7 @@ import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
 import io.flutter.plugin.common.PluginRegistry.Registrar
+import java.io.File
 
 /** MusicPlugin */
 @Suppress("UNCHECKED_CAST")
@@ -90,9 +96,6 @@ open class MusicPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
 
   override fun onMethodCall(call: MethodCall, result: Result) {
     Log.d("MusicPlugin", "onMethodCall ${call.method}")
-    if (!requestPermission()) {
-      result.success("没有权限")
-    }
     var resultData: Any? = "true"
     when (call.method) {
       "playSong" -> playSong(call.arguments as Map<String, Any?>)
@@ -108,9 +111,38 @@ open class MusicPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
       "getPlayListSongId" -> resultData = getPlayListSongId()
       "setPlayMusicMode" -> setPlayMusicMode(call.arguments as Int)
       "removeSongInfoById" -> removeSongInfoById(call.arguments as String?)
+      "downloadMusic" -> downloadMusic(call.arguments as? String?)
       else -> result.notImplemented()
     }
     result.success(resultData)
+  }
+
+  private fun downloadMusic(songName : String?) {
+    if (!requestPermission()) return
+    val playUrl = StarrySky.with().getNowPlayingSongInfo()?.songUrl
+    val realSongName = "${songName ?: StarrySky.with().getNowPlayingSongInfo()?.songId}.mp3"
+    if (playUrl.isNullOrEmpty()) return
+    val downloadManager =
+      activity?.getSystemService(Context.DOWNLOAD_SERVICE) as? DownloadManager
+    if (downloadManager == null) {
+      Toast.makeText(activity, "下载失败，系统不支持", Toast.LENGTH_SHORT).show()
+      return
+    }
+    val path =
+      Environment.getExternalStorageDirectory().path + "/music/" + realSongName
+    val file = File(path)
+    if (file.exists()) {
+      file.delete()
+    }
+    downloadManager
+      .enqueue(
+        Request(Uri.parse(playUrl))
+          .setDestinationInExternalPublicDir("/music/", realSongName)
+          .setTitle("下载歌曲")
+          .setNotificationVisibility(
+            Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED
+          )
+      )
   }
 
   private fun removeSongInfoById(songId: String?) {

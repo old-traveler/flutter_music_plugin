@@ -178,6 +178,10 @@ class MusicWrapper {
     _channel.invokeMethod('removeSongInfoById', songId);
   }
 
+  void downloadMusic(String songName) {
+    _channel.invokeMethod('downloadMusic', songName);
+  }
+
   void initState() {
     _controller?.close();
     _controller ??= StreamController.broadcast();
