@@ -107,9 +107,19 @@ open class MusicPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
       "prepareFromSongId" -> prepareFromSongId(call.arguments as? String?)
       "getPlayListSongId" -> resultData = getPlayListSongId()
       "setPlayMusicMode" -> setPlayMusicMode(call.arguments as Int)
+      "removeSongInfoById" -> removeSongInfoById(call.arguments as String?)
       else -> result.notImplemented()
     }
     result.success(resultData)
+  }
+
+  private fun removeSongInfoById(songId: String?) {
+    songId ?: return
+    val sky = StarrySky.with()
+    if (sky.isCurrMusicIsPlayingMusic(songId)) {
+      sky.skipToNext()
+    }
+    StarrySky.with().removeSongInfo(songId)
   }
 
   private fun setPlayMusicMode(mode: Int) {

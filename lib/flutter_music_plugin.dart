@@ -174,6 +174,10 @@ class MusicWrapper {
     return await _channel.invokeMethod<int>('getState');
   }
 
+  void removeSongInfoById(String songId) {
+    _channel.invokeMethod('removeSongInfoById', songId);
+  }
+
   void initState() {
     _controller?.close();
     _controller ??= StreamController.broadcast();
