@@ -33,16 +33,21 @@ open class MusicPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
   override fun onAttachedToEngine(flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
     mChannel = MethodChannel(flutterPluginBinding.binaryMessenger, "music")
     mChannel.setMethodCallHandler(MusicPlugin())
-    Log.d("MusicPlugin", "onAttachedToEngine")
+    flutterPluginBinding.platformViewRegistry.registerViewFactory(
+      "flutterWebView",
+      FlutterWebViewFactory(flutterPluginBinding.binaryMessenger)
+    )
   }
 
   // flutter 1.12之前会自动调用registerWith，1.12之后走onAttachedToEngine
   companion object {
-    protected var activity: Activity? = null
+    var activity: Activity? = null
     lateinit var mChannel: MethodChannel
     fun registerWith(registrar: Registrar) {
       val channel = MethodChannel(registrar.messenger(), "music")
       channel.setMethodCallHandler(MusicPlugin())
+      registrar.platformViewRegistry()
+        .registerViewFactory("flutterWebView", FlutterWebViewFactory(registrar.messenger()))
     }
   }
 
@@ -117,7 +122,7 @@ open class MusicPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
     result.success(resultData)
   }
 
-  private fun downloadMusic(songName : String?) {
+  private fun downloadMusic(songName: String?) {
     if (!requestPermission()) return
     val playUrl = StarrySky.with().getNowPlayingSongInfo()?.songUrl
     val realSongName = "${songName ?: StarrySky.with().getNowPlayingSongInfo()?.songId}.mp3"
