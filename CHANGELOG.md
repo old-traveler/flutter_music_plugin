@@ -5,4 +5,7 @@
 ## 0.0.3
 add setPlayMusicMode
 
+## 0.0.4
+support music download
+
 * TODO: Describe initial release.
