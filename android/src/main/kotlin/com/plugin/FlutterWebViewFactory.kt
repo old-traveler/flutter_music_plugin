@@ -18,6 +18,6 @@ class FlutterWebViewFactory(private val binaryMessenger: BinaryMessenger) : Plat
   override fun create(context: Context?, viewId: Int, args: Any?): PlatformView {
     val params =
       args as? Map<String?, Any?>
-    return FlutterWebView(context, binaryMessenger, viewId, params)
+    return FlutterWebView(context, binaryMessenger, params)
   }
 }
