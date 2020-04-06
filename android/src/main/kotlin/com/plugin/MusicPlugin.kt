@@ -194,6 +194,10 @@ open class MusicPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
       SongInfo(songId = it[0], songUrl = it[1])
     }
     StarrySky.with().playMusic(songInfoList, index)
+    val pause = map["pause"] as? Boolean ?: false
+    if (pause){
+      StarrySky.with().pauseMusic()
+    }
   }
 
   private fun playOrPauseMusic() {
