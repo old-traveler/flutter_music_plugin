@@ -107,7 +107,7 @@ open class MusicPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
       "registerStateListener" -> registerStateListener()
       "unregisterStateListener" -> unregisterStateListener()
       "seekTo" -> seekTo((call.arguments as Int).toLong())
-      "playOrPauseMusic" -> playOrPauseMusic()
+      "playOrPauseMusic" -> playOrPauseMusic(call.arguments as? String?)
       "playMusicById" -> playMusicById(call.arguments as String)
       "loadMusicList" -> loadMusicList(call.arguments as Map<String, Any>)
       "playNebOrPreviousSong" -> playNebOrPreviousSong(call.arguments as Boolean)
@@ -143,7 +143,7 @@ open class MusicPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
       .enqueue(
         Request(Uri.parse(playUrl))
           .setDestinationInExternalPublicDir("/music/", realSongName)
-          .setTitle("下载歌曲")
+          .setTitle(realSongName)
           .setNotificationVisibility(
             Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED
           )
@@ -195,13 +195,14 @@ open class MusicPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
     }
     StarrySky.with().playMusic(songInfoList, index)
     val pause = map["pause"] as? Boolean ?: false
-    if (pause){
+    if (pause) {
       StarrySky.with().pauseMusic()
     }
   }
 
-  private fun playOrPauseMusic() {
+  private fun playOrPauseMusic(songId : String?) {
     val sky = StarrySky.with()
+    Log.d("MusicPlugin","isPause :${sky.isPaused()}   isPlaying :${sky.isPlaying()}  ${sky.getState()}")
     if (sky.isPaused()) {
       sky.restoreMusic()
     } else if (sky.isPlaying()) {
@@ -218,6 +219,8 @@ open class MusicPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
       sky.playMusicByInfo(info)
     } else if (sky.getState() == PlaybackStateCompat.STATE_STOPPED && sky.getNowPlayingSongInfo() != null) {
       sky.playMusicById(sky.getNowPlayingSongInfo()?.songId!!)
+    } else if (sky.isIdea() && !songId.isNullOrEmpty()){
+      playMusicById(songId)
     }
   }
 
@@ -233,6 +236,9 @@ open class MusicPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
       override fun applyOptions(context: Context, builder: StarrySkyBuilder) {
         super.applyOptions(context, builder)
         builder.setOpenCache(true)
+        val destFileDir = Environment.getExternalStorageDirectory().absolutePath + "/music/cache/"
+        builder.setCacheDestFileDir(destFileDir)
+        Log.d("MusicPlugin",destFileDir)
       }
     })
     MusicStateManager.register()

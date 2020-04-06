@@ -138,8 +138,8 @@ class MusicWrapper {
     _channel.invokeMethod('seekTo', position);
   }
 
-  void playOrPauseMusic() {
-    _channel.invokeMethod('playOrPauseMusic');
+  void playOrPauseMusic({String songId}) {
+    _channel.invokeMethod('playOrPauseMusic', songId);
   }
 
   void setPlayMusicMode(int mode) {
