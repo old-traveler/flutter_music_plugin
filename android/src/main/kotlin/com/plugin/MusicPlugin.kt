@@ -51,8 +51,7 @@ open class MusicPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
     }
   }
 
-  private fun requestPermission(listener: (grant: Boolean) -> Unit): Boolean {
-    activity ?: return false
+  private fun hasPermission(): Boolean {
     val code =
       if (VERSION.SDK_INT >= VERSION_CODES.M) {
         activity!!.checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) + activity!!.checkSelfPermission(
@@ -62,7 +61,12 @@ open class MusicPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         // VERSION.SDK_INT < M
         0
       }
-    if (code != 0) {
+    return code == 0
+  }
+
+  private fun requestPermission(listener: (grant: Boolean) -> Unit): Boolean {
+    activity ?: return false
+    if (!hasPermission()) {
       if (VERSION.SDK_INT >= VERSION_CODES.M) {
         (activity)?.let {
           var fragment = it.fragmentManager.findFragmentByTag("request")
@@ -246,7 +250,7 @@ open class MusicPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
 
   private fun registerStateListener() {
     if (!requestPermission {
-        if (it) {
+        if (it || hasPermission()) {
           registerStateListener()
         } else {
           Toast.makeText(activity!!, "未给予读写权限,无法正常运行", Toast.LENGTH_SHORT).show()
