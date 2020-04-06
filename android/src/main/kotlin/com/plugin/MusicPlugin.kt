@@ -51,7 +51,7 @@ open class MusicPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
     }
   }
 
-  private fun requestPermission(): Boolean {
+  private fun requestPermission(listener: (grant: Boolean) -> Unit): Boolean {
     activity ?: return false
     val code =
       if (VERSION.SDK_INT >= VERSION_CODES.M) {
@@ -64,12 +64,18 @@ open class MusicPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
       }
     if (code != 0) {
       if (VERSION.SDK_INT >= VERSION_CODES.M) {
-        activity!!.requestPermissions(
-          arrayOf(
-            Manifest.permission.WRITE_EXTERNAL_STORAGE,
-            Manifest.permission.READ_EXTERNAL_STORAGE
-          ), 1
-        )
+        (activity)?.let {
+          var fragment = it.fragmentManager.findFragmentByTag("request")
+          fragment ?: let { fr ->
+            fragment = PermissionFragment()
+            if (VERSION.SDK_INT >= VERSION_CODES.N) {
+              it.fragmentManager.beginTransaction().add(fragment!!, "request").commitNow()
+            } else {
+              it.fragmentManager.beginTransaction().add(fragment!!, "request").commit()
+            }
+          }
+          (fragment as? PermissionFragment)?.requestStoragePermission(listener)
+        }
       }
     } else {
       return true
@@ -123,7 +129,11 @@ open class MusicPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
   }
 
   private fun downloadMusic(songName: String?) {
-    if (!requestPermission()) return
+    if (!requestPermission {
+        if (it) {
+          downloadMusic(songName)
+        }
+      }) return
     val playUrl = StarrySky.with().getNowPlayingSongInfo()?.songUrl
     val realSongName = "${songName ?: StarrySky.with().getNowPlayingSongInfo()?.songId}.mp3"
     if (playUrl.isNullOrEmpty()) return
@@ -200,9 +210,12 @@ open class MusicPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
     }
   }
 
-  private fun playOrPauseMusic(songId : String?) {
+  private fun playOrPauseMusic(songId: String?) {
     val sky = StarrySky.with()
-    Log.d("MusicPlugin","isPause :${sky.isPaused()}   isPlaying :${sky.isPlaying()}  ${sky.getState()}")
+    Log.d(
+      "MusicPlugin",
+      "isPause :${sky.isPaused()}   isPlaying :${sky.isPlaying()}  ${sky.getState()}"
+    )
     if (sky.isPaused()) {
       sky.restoreMusic()
     } else if (sky.isPlaying()) {
@@ -219,7 +232,7 @@ open class MusicPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
       sky.playMusicByInfo(info)
     } else if (sky.getState() == PlaybackStateCompat.STATE_STOPPED && sky.getNowPlayingSongInfo() != null) {
       sky.playMusicById(sky.getNowPlayingSongInfo()?.songId!!)
-    } else if (sky.isIdea() && !songId.isNullOrEmpty()){
+    } else if (sky.isIdea() && !songId.isNullOrEmpty()) {
       playMusicById(songId)
     }
   }
@@ -232,14 +245,25 @@ open class MusicPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
   }
 
   private fun registerStateListener() {
+    if (!requestPermission {
+        if (it) {
+          registerStateListener()
+        } else {
+          Toast.makeText(activity!!, "未给予读写权限,无法正常运行", Toast.LENGTH_SHORT).show()
+          activity!!.finish()
+        }
+      }) {
+      return
+    }
     StarrySky.init(activity!!.application, object : StarrySkyConfig() {
       override fun applyOptions(context: Context, builder: StarrySkyBuilder) {
         super.applyOptions(context, builder)
         builder.setOpenCache(true)
         val destFileDir = Environment.getExternalStorageDirectory().absolutePath + "/music/cache/"
         builder.setCacheDestFileDir(destFileDir)
-        Log.d("MusicPlugin",destFileDir)
+        Log.d("MusicPlugin", destFileDir)
       }
+
     })
     MusicStateManager.register()
   }
