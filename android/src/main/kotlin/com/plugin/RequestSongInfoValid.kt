@@ -36,7 +36,10 @@ class RequestSongInfoValid : Valid {
 
         override fun success(result: Any?) {
           if (result is String) {
-            songInfo.songUrl = result
+            val url = result.split("@")[0]
+            val duration = result.split("@")[1]
+            songInfo.songUrl = url
+            songInfo.duration = duration.toLong()
             callback.finishValid()
           }
         }

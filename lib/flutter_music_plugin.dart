@@ -155,7 +155,7 @@ class MusicWrapper {
 
   void loadMusicList({List<SongInfo> list, int index = 0, bool pause = false}) {
     final dataList = list.map<List<String>>((info) {
-      return [info.songId, info.songUrl];
+      return [info.songId, info.songUrl, info.duration.toString()];
     }).toList();
     Map map = {'index': index, 'songList': dataList, 'pause': pause};
     _channel.invokeMethod('loadMusicList', map);

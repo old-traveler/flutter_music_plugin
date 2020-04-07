@@ -5,6 +5,7 @@ import android.os.Handler
 import android.os.Message
 import com.lzx.starrysky.StarrySky
 import com.lzx.starrysky.control.OnPlayerEventListener
+import com.lzx.starrysky.control.PlayerControl
 import com.lzx.starrysky.provider.SongInfo
 
 /**
@@ -13,7 +14,7 @@ import com.lzx.starrysky.provider.SongInfo
  * @desc:
  */
 object MusicStateManager : OnPlayerEventListener {
-  var hasRegister = false
+  private var hasRegister = false
   const val PROGRESS: Int = 1
   private val mHandler: Handler = @SuppressLint("HandlerLeak")
   object : Handler() {
@@ -27,7 +28,7 @@ object MusicStateManager : OnPlayerEventListener {
 
   fun onProgressChange() {
     val sky = StarrySky.with()
-    if (sky.getPlayingPosition() > 0 && sky.getPlayingPosition() > sky.getDuration()) {
+    if (sky.getPlayingPosition() > 0 && sky.getPlayingPosition() > sky.getRealDuration()) {
       if (sky.isSkipToNextEnabled() && sky.getPlayList().size > 1) {
         sky.skipToNext()
       } else {
@@ -45,12 +46,20 @@ object MusicStateManager : OnPlayerEventListener {
     StarrySky.with().apply {
       arguments["state"] = getState()
       arguments["position"] = getPlayingPosition()
-      arguments["duration"] = getDuration()
+      arguments["duration"] = getRealDuration()
       arguments["buffered"] = getBufferedPosition()
       arguments["error"] = getErrorCode()
       arguments["songId"] = getNowPlayingSongInfo()?.songId
     }
     MusicPlugin.mChannel.invokeMethod("onStateChange", arguments)
+  }
+
+  private fun PlayerControl.getRealDuration(): Long {
+    var duration = getNowPlayingSongInfo()?.duration ?: -1
+    if (duration < 0) {
+      duration = getDuration()
+    }
+    return duration
   }
 
   fun register() {
