@@ -16,6 +16,7 @@ import com.lzx.starrysky.StarrySky
 import com.lzx.starrysky.StarrySkyBuilder
 import com.lzx.starrysky.StarrySkyConfig
 import com.lzx.starrysky.provider.SongInfo
+import com.lzx.starrysky.registry.StarrySkyRegistry
 import io.flutter.embedding.engine.plugins.FlutterPlugin
 import io.flutter.embedding.engine.plugins.activity.ActivityAware
 import io.flutter.embedding.engine.plugins.activity.ActivityPluginBinding
@@ -266,6 +267,11 @@ open class MusicPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         val destFileDir = Environment.getExternalStorageDirectory().absolutePath + "/music/cache/"
         builder.setCacheDestFileDir(destFileDir)
         Log.d("MusicPlugin", destFileDir)
+      }
+
+      override fun applyStarrySkyRegistry(context: Context, registry: StarrySkyRegistry?) {
+        super.applyStarrySkyRegistry(context, registry)
+        registry?.appendValidRegistry(RequestSongInfoValid())
       }
 
     })

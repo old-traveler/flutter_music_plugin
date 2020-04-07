@@ -4,6 +4,7 @@ import 'dart:math';
 import 'package:flutter/services.dart';
 
 typedef MusicStateListener = void Function(MusicState);
+typedef MusicPlayUrlProvider = Future<String> Function(String songId);
 
 class MusicState {
   int state;
@@ -102,13 +103,19 @@ class MusicWrapper {
   static MusicWrapper _wrapper;
   List<MusicStateListener> stateListeners = [];
   StreamController<MusicState> _controller;
+  MusicPlayUrlProvider playUrlProvider;
 
   static MusicWrapper get singleton => _wrapper ??= MusicWrapper();
 
   MethodChannel _channel = const MethodChannel('music')
-    ..setMethodCallHandler((methodCall) {
+    ..setMethodCallHandler((methodCall) async {
       if ('onStateChange' == methodCall.method) {
         _wrapper._controller.add(MusicState.formMap(methodCall.arguments));
+      } else if ('updatePlayingUrl' == methodCall.method) {
+        if (_wrapper.playUrlProvider == null) {
+          throw Exception('playUrlProvider must not be null');
+        }
+        return await _wrapper.playUrlProvider(methodCall.arguments);
       }
       return Future.value(true);
     });
@@ -150,7 +157,7 @@ class MusicWrapper {
     final dataList = list.map<List<String>>((info) {
       return [info.songId, info.songUrl];
     }).toList();
-    Map map = {'index': index, 'songList': dataList, 'pause' : pause};
+    Map map = {'index': index, 'songList': dataList, 'pause': pause};
     _channel.invokeMethod('loadMusicList', map);
   }
 
@@ -174,8 +181,8 @@ class MusicWrapper {
     return await _channel.invokeMethod<int>('getState');
   }
 
-  void removeSongInfoById(String songId) {
-    _channel.invokeMethod('removeSongInfoById', songId);
+  Future removeSongInfoById(String songId) async {
+    return _channel.invokeMethod('removeSongInfoById', songId);
   }
 
   void downloadMusic(String songName) {
