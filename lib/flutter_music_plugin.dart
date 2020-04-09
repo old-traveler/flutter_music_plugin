@@ -161,6 +161,14 @@ class MusicWrapper {
     _channel.invokeMethod('loadMusicList', map);
   }
 
+  void appendMusicList({List<SongInfo> list, int index = 0}) {
+    final dataList = list.map<List<String>>((info) {
+      return [info.songId, info.songUrl, info.duration.toString()];
+    }).toList();
+    Map map = {'index': index, 'songList': dataList};
+    _channel.invokeMethod('appendMusicList', map);
+  }
+
   void playMusicById(String songId) {
     _channel.invokeMethod('playMusicById', songId);
   }

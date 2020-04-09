@@ -53,6 +53,7 @@ class RequestSongInfoValid : Valid {
     if (playUrl.startsWith(baseWebUrl)) {
       val time = playUrl.substring(baseWebUrl.length, baseWebUrl.length + 12).toLong()
       val curTime = SimpleDateFormat("yyyyMMddHHmm").format(Date()).toLong()
+      Log.d("validPlayUrl","time：$time curTime：$curTime")
       if (curTime - time > 10000) {
         // 链接失效
         Log.d("validPlayUrl", "链接失效")
