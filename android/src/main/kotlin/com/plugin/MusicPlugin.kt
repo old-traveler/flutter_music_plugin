@@ -212,7 +212,7 @@ open class MusicPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
     StarrySky.with().playMusic(songInfoList, index)
     val pause = map["pause"] as? Boolean ?: false
     if (pause) {
-      Log.d("loadMusicList","pauseMusic")
+      Log.d("loadMusicList", "pauseMusic")
       StarrySky.with().pauseMusic()
     }
   }
@@ -226,7 +226,7 @@ open class MusicPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
     val newPlayList = mutableListOf<SongInfo>()
     newPlayList.addAll(songInfoList)
     newPlayList.addAll(StarrySky.with().getPlayList())
-    StarrySky.with().playMusic(songInfoList, index)
+    StarrySky.with().playMusic(newPlayList, index)
   }
 
   private fun playOrPauseMusic(songId: String?) {
