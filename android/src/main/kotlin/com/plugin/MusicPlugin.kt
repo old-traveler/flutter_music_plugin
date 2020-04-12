@@ -129,9 +129,19 @@ open class MusicPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
       "removeSongInfoById" -> removeSongInfoById(call.arguments as String?)
       "downloadMusic" -> downloadMusic(call.arguments as? String?)
       "appendMusicList" -> appendMusicList(call.arguments as Map<String, Any>)
+      "removeMusicList" -> removeMusicList()
       else -> result.notImplemented()
     }
     result.success(resultData)
+  }
+
+  private fun removeMusicList() {
+    StarrySky.with()?.apply {
+      val keyList = getPlayList().map { it.songId }
+      keyList.forEach {
+        this.removeSongInfo(it)
+      }
+    }
   }
 
   private fun downloadMusic(songName: String?) {

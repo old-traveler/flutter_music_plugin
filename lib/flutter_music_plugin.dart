@@ -169,6 +169,10 @@ class MusicWrapper {
     _channel.invokeMethod('appendMusicList', map);
   }
 
+  Future removeMusicList() async {
+    return await _channel.invokeMethod('removeMusicList');
+  }
+
   void playMusicById(String songId) {
     _channel.invokeMethod('playMusicById', songId);
   }
