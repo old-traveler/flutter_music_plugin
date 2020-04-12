@@ -88,11 +88,8 @@ open class MusicPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
     return false
   }
 
-  private fun playSong(map: Map<String, Any?>) {
-    val info = SongInfo()
-    info.songId = map["songId"] as String? ?: ""
-    info.songUrl = map["songUrl"] as String? ?: ""
-    info.duration = (map["duration"] as Int? ?: -1).toLong()
+  private fun playSong(list: List<String?>) {
+    val info = listToSongInfo(list)
     val sky = StarrySky.with()
     if (!sky.isCurrMusicIsPlayingMusic(info.songId)) {
       sky.playMusicByInfo(info)
@@ -114,7 +111,7 @@ open class MusicPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
     Log.d("MusicPlugin", "onMethodCall ${call.method}")
     var resultData: Any? = "true"
     when (call.method) {
-      "playSong" -> playSong(call.arguments as Map<String, Any?>)
+      "playSong" -> playSong(call.arguments as List<String?>)
       "registerStateListener" -> registerStateListener()
       "unregisterStateListener" -> unregisterStateListener()
       "seekTo" -> seekTo((call.arguments as Int).toLong())
@@ -133,6 +130,17 @@ open class MusicPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
       else -> result.notImplemented()
     }
     result.success(resultData)
+  }
+
+  private fun listToSongInfo(list: List<String?>): SongInfo {
+    return SongInfo(
+      songId = list[0]!!,
+      songUrl = list[1] ?: "",
+      duration = list[2]!!.toLong(),
+      artist = list[3] ?: "",
+      songName = list[4] ?: "",
+      songCover = list[5] ?: ""
+    )
   }
 
   private fun removeMusicList() {
@@ -217,7 +225,7 @@ open class MusicPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
     val index = map["index"] as Int
     val songList = map["songList"] as List<List<String?>>
     val songInfoList: List<SongInfo> = songList.map {
-      SongInfo(songId = it[0]!!, songUrl = it[1] ?: "", duration = it[2]!!.toLong())
+      listToSongInfo(it)
     }
     StarrySky.with().playMusic(songInfoList, index)
     val pause = map["pause"] as? Boolean ?: false
@@ -231,7 +239,7 @@ open class MusicPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
     val index = map["index"] as Int
     val songList = map["songList"] as List<List<String?>>
     val songInfoList: List<SongInfo> = songList.map {
-      SongInfo(songId = it[0]!!, songUrl = it[1] ?: "", duration = it[2]!!.toLong())
+      listToSongInfo(it)
     }
     val newPlayList = mutableListOf<SongInfo>()
     newPlayList.addAll(songInfoList)

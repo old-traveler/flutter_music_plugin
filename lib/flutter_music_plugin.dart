@@ -95,8 +95,12 @@ class SongInfo {
   String songId;
   String songUrl;
   int duration;
+  String singerName;
+  String songName;
+  String imgUrl;
 
-  SongInfo(this.songId, this.songUrl, {this.duration = -1});
+  SongInfo(this.songId, this.songUrl,
+      {this.duration = -1, this.singerName, this.songName, this.imgUrl});
 }
 
 class MusicWrapper {
@@ -120,15 +124,20 @@ class MusicWrapper {
       return Future.value(true);
     });
 
-  Future<String> playSong(String songId, String songUrl,
-      {int duration = -1}) async {
-    final String version = await _channel.invokeMethod('playSong',
-        {'songId': songId, 'songUrl': songUrl, 'duration': duration});
-    return version;
+
+  List<String> infoToList(SongInfo info) {
+    return [
+      info.songId,
+      info.songUrl,
+      info.duration.toString(),
+      info.singerName,
+      info.songName,
+      info.imgUrl,
+    ];
   }
 
-  void playSongByInfo(SongInfo info) {
-    playSong(info.songId, info.songUrl, duration: info.duration);
+  Future<String> playSongByInfo(SongInfo info) async {
+    return await _channel.invokeMethod('playSong', infoToList(info));
   }
 
   void _registerStateListener() async {
@@ -155,7 +164,7 @@ class MusicWrapper {
 
   void loadMusicList({List<SongInfo> list, int index = 0, bool pause = false}) {
     final dataList = list.map<List<String>>((info) {
-      return [info.songId, info.songUrl, info.duration.toString()];
+      return infoToList(info);
     }).toList();
     Map map = {'index': index, 'songList': dataList, 'pause': pause};
     _channel.invokeMethod('loadMusicList', map);
@@ -163,7 +172,7 @@ class MusicWrapper {
 
   void appendMusicList({List<SongInfo> list, int index = 0}) {
     final dataList = list.map<List<String>>((info) {
-      return [info.songId, info.songUrl, info.duration.toString()];
+      return infoToList(info);
     }).toList();
     Map map = {'index': index, 'songList': dataList};
     _channel.invokeMethod('appendMusicList', map);

@@ -2,6 +2,7 @@ package com.plugin
 
 import android.annotation.SuppressLint
 import android.util.Log
+import com.lzx.starrysky.StarrySky
 import com.lzx.starrysky.delayaction.Valid
 import com.lzx.starrysky.delayaction.Valid.ValidCallback
 import com.lzx.starrysky.provider.SongInfo
@@ -36,11 +37,16 @@ class RequestSongInfoValid : Valid {
 
         override fun success(result: Any?) {
           if (result is String) {
-            val url = result.split("@")[0]
-            val duration = result.split("@")[1]
-            songInfo.songUrl = url
-            songInfo.duration = duration.toLong()
-            callback.finishValid()
+            result.split("@").let {
+              val url = it[0]
+              val duration = it[1]
+              val sizableCover = it[2]
+              songInfo.songUrl = url
+              songInfo.duration = duration.toLong()
+              songInfo.songCover = sizableCover
+              callback.finishValid()
+            }
+
           }
         }
 
@@ -53,7 +59,7 @@ class RequestSongInfoValid : Valid {
     if (playUrl.startsWith(baseWebUrl)) {
       val time = playUrl.substring(baseWebUrl.length, baseWebUrl.length + 12).toLong()
       val curTime = SimpleDateFormat("yyyyMMddHHmm").format(Date()).toLong()
-      Log.d("validPlayUrl","time：$time curTime：$curTime")
+      Log.d("validPlayUrl", "time：$time curTime：$curTime")
       if (curTime - time > 10000) {
         // 链接失效
         Log.d("validPlayUrl", "链接失效")
