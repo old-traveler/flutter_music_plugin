@@ -290,6 +290,7 @@ open class MusicPlugin : FlutterPlugin, MethodCallHandler, ActivityAware {
         builder.setOpenCache(true)
         val destFileDir = Environment.getExternalStorageDirectory().absolutePath + "/music/cache/"
         builder.setCacheDestFileDir(destFileDir)
+        builder.setOpenNotification(true)
         Log.d("MusicPlugin", destFileDir)
       }
 
