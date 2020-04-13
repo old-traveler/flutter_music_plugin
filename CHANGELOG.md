@@ -11,4 +11,7 @@ support music download
 ## 0.0.5
 support web
 
+## 0.0.6
+support Notification
+
 * TODO: Describe initial release.
